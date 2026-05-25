@@ -5,6 +5,7 @@ import br.com.pedrojaber.model.Mensagem;
 import br.com.pedrojaber.repository.MensagemRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,32 +37,39 @@ public class MensagemServiceTest {
         mock.close();
     }
 
-    @Test
-    void devePermitirRegistrarMensagem() {
+    @Nested
+    class RegistrarMensagem {
 
-        // Arrange
-        var mensagem = MensagemHelper.gerarMensagem();
+        @Test
+        void devePermitirRegistrarMensagem() {
 
-        when(mensagemRepository.save(any(Mensagem.class))).thenAnswer(
-                i -> i.getArgument(0)
-        );
+            // Arrange
+            var mensagem = MensagemHelper.gerarMensagem();
 
-        // Act
-        var mensagemRegistrada = mensagemService.registrarMensagem(mensagem);
+            when(mensagemRepository.save(any(Mensagem.class))).thenAnswer(
+                    i -> i.getArgument(0)
+            );
 
-        // Assert
-        assertThat(mensagemRegistrada)
-                .isNotNull()
-                .isInstanceOf(Mensagem.class);
+            // Act
+            var mensagemRegistrada = mensagemService.registrarMensagem(mensagem);
 
-        assertThat(mensagemRegistrada.getId())
-                .isNotNull();
+            // Assert
+            assertThat(mensagemRegistrada)
+                    .isNotNull()
+                    .isInstanceOf(Mensagem.class);
 
-        assertThat(mensagemRegistrada.getUsuario())
-                .isEqualTo(mensagem.getUsuario());
+            assertThat(mensagemRegistrada.getId())
+                    .isNotNull();
 
-        assertThat(mensagemRegistrada.getConteudo())
-                .isEqualTo(mensagem.getConteudo());
+            assertThat(mensagemRegistrada.getUsuario())
+                    .isEqualTo(mensagem.getUsuario());
+
+            assertThat(mensagemRegistrada.getConteudo())
+                    .isEqualTo(mensagem.getConteudo());
+
+            verify(mensagemRepository, times(1)).save(mensagem);
+
+        }
 
     }
 
