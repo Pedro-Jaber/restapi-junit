@@ -4,21 +4,22 @@ import br.com.pedrojaber.helper.MensagemHelper;
 import br.com.pedrojaber.model.Mensagem;
 import br.com.pedrojaber.repository.MensagemRepository;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import org.hibernate.validator.internal.constraintvalidators.bv.AssertTrueValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @Transactional
+@Sql(scripts = {"/db_load.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"/db_clean.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class MensagemServiceIT {
 
     @Autowired
@@ -26,6 +27,8 @@ public class MensagemServiceIT {
 
     @Autowired
     private MensagemService mensagemService;
+    @Autowired
+    private AssertTrueValidator assertTrueValidator;
 
     @Test
     void devePermitirRegistrarMensagem() {
@@ -55,11 +58,10 @@ public class MensagemServiceIT {
     void devePermitirObterMensagem() {
 
         // Arrange
-        var mensagem = MensagemHelper.gerarMensagem();
-        var mensagemRegistrada = mensagemService.registrarMensagem(mensagem);
+        var id = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
 
         // Act
-        var mensagemObtida = mensagemService.obterMensagem(mensagemRegistrada.getId());
+        var mensagemObtida = mensagemService.obterMensagem(id);
 
         // Assert
         assertThat(mensagemObtida)
@@ -80,14 +82,13 @@ public class MensagemServiceIT {
     void devePermitirRemoverMensagem() {
 
         // Arrange
-        var mensagem = MensagemHelper.gerarMensagem();
-        var mensagemRegistrada = mensagemService.registrarMensagem(mensagem);
+        var id = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
 
         // Act
-        var mensagemRemovida = mensagemService.obterMensagem(mensagemRegistrada.getId());
+        boolean mensagemRemovida = mensagemService.removerMensagem(id);
 
         // Assert
-        assertThat(mensagemRemovida).isTrue();
+        assertThat(mensagemRemovida).isEqualTo(true);
 
     }
 }
