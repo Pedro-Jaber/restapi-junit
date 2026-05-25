@@ -1,5 +1,6 @@
 package br.com.pedrojaber.controller;
 
+import br.com.pedrojaber.exception.MensagemNotFoundException;
 import br.com.pedrojaber.handler.GlobalExceptionHandler;
 import br.com.pedrojaber.model.Mensagem;
 import br.com.pedrojaber.repository.MensagemRepository;
@@ -17,11 +18,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import static br.com.pedrojaber.helper.MensagemHelper.gerarMensagem;
 import static org.assertj.core.api.Fail.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class MensagemControllerTest {
@@ -68,6 +73,62 @@ public class MensagemControllerTest {
                 .andExpect(status().isCreated());
 
         verify(mensagemService, times(1)).registrarMensagem(any(Mensagem.class));
+    }
+
+    @Test
+    void devePermitirObterMensagem() throws Exception {
+
+        // Arrange
+        var id = UUID.fromString("c3d4e5f6-a7b8-9012-cdef-123456789012");
+        var mensagemResponse = gerarMensagem();
+
+        mensagemResponse.setId(id);
+        mensagemResponse.setDataCriacao(LocalDateTime.now());
+        mensagemResponse.setDataAlteracao(LocalDateTime.now());
+
+        when(mensagemService.obterMensagem(any(UUID.class)))
+                .thenReturn(mensagemResponse);
+
+        // Act + Assert
+        mockMvc.perform(get("/mensagens/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(mensagemService, times(1)).obterMensagem(any(UUID.class));
+
+    }
+
+    @Test
+     void deveGerarExcecaoAoObterMensagemComIdNaoExistente() throws Exception {
+
+        // Arrange
+        var id = UUID.fromString("13d4e5f6-a7b8-9012-cdef-123456789012");
+
+        when(mensagemService.obterMensagem(any(UUID.class)))
+                .thenThrow(new MensagemNotFoundException("mensagem não encontrada"));
+
+        // Act + Assert
+        mockMvc.perform(get("/mensagens/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(mensagemService, times(1)).obterMensagem(any(UUID.class));
+
+    }
+
+    @Test
+    void deveGerarExcecaoAoObterMensagemComIdInvalido() throws Exception {
+
+        // Arrange
+        var id = "123";
+
+        // Act + Assert
+        mockMvc.perform(get("/mensagens/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(mensagemService, times(0)).obterMensagem(any(UUID.class));
+
     }
 
     private String asJsonString(final Object obj) {
