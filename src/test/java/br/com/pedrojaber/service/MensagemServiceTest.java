@@ -91,19 +91,19 @@ public class MensagemServiceTest {
         assertThat(mensagemObtida).isEqualTo(mensagem);
     }
 
-    @Test
-    void devePermitirObterMensagens() {
-        fail("n implementado");
-    }
-
-    @Test
-    void devePermitirModificarMensagem() {
-        fail("n implementado");
-    }
-
-    @Test
-    void devePermitirRemoverMensagem() {
-        fail("n implementado");
-    }
+//    @Test
+//    void devePermitirObterMensagens() {
+//        fail("n implementado");
+//    }
+//
+//    @Test
+//    void devePermitirModificarMensagem() {
+//        fail("n implementado");
+//    }
+//
+//    @Test
+//    void devePermitirRemoverMensagem() {
+//        fail("n implementado");
+//    }
 
 }

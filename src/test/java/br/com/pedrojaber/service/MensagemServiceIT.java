@@ -23,12 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MensagemServiceIT {
 
     @Autowired
-    private MensagemRepository mensagemRepository;
-
-    @Autowired
     private MensagemService mensagemService;
-    @Autowired
-    private AssertTrueValidator assertTrueValidator;
 
     @Test
     void devePermitirRegistrarMensagem() {
